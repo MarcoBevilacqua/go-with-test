@@ -3,9 +3,11 @@ package blogrenderer_test
 import (
 	"bytes"
 	"testing"
+
+	"github.com/MarcoBevilacqua/blogrenderer"
 )
 
-func TestRenderer(t *testing.T) {
+func TestRender(t *testing.T) {
 	var (
 		aPost = blogrenderer.Post{
 			Title:       "hello world",
