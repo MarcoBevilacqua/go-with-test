@@ -1,4 +1,4 @@
-package main
+package poker
 
 import (
 	"log"
@@ -20,7 +20,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("problem creating file system player store, %v ", err)
 	}
-	
+
 	server := NewPlayerServer(store)	
 
 	if err := http.ListenAndServe(":5000", server); err != nil {
