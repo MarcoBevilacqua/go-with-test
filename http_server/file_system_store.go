@@ -1,0 +1,47 @@
+package main
+
+import (
+	"encoding/json"
+	"io"
+)
+
+type FileSystemPlayerStore struct {
+	database io.Writer
+	league league
+}
+
+func NewFileSystemPlayerStore(database io.ReadWriteSeeker, league league) *FileSystemPlayerStore {
+	database.Seek(0, 0)
+	league, _ = NewLeague(database)
+
+	return &FileSystemPlayerStore{
+		database: &tape{database},
+		league:   league,
+	}
+}
+
+func (f *FileSystemPlayerStore) GetLeague() league {
+	return f.league
+}
+
+func (f *FileSystemPlayerStore) GetPlayerScore(name string) int {
+	player := f.league.find(name)		
+	if player != nil {
+		return player.Wins
+	}	
+
+	return 0
+}
+
+func (f *FileSystemPlayerStore) RecordWin(name string) {
+	player := f.league.find(name)
+	
+	if player != nil {
+		player.Wins++
+	} else {
+		f.league = append(f.league, Player{name, 1})
+	}
+
+	json.NewEncoder(f.database).Encode(f.league)
+
+}
