@@ -94,14 +94,22 @@ func TestStoreWins(t *testing.T) {
 	})	
 
 	t.Run("it records Win when POST", func (t *testing.T) {
+		store := StubPlayerStore{
+			map[string]int{},
+			nil,
+			nil,
+		}
+		server := NewPlayerServer(&store)
+
 		player := "Pepper"
-		request := newPostWinRequest("Pepper")
+		request := newPostWinRequest(player)
 		response := httptest.NewRecorder()
 		
 		server.ServeHTTP(response, request)
 		assertStatus(t, response.Code, http.StatusAccepted)
 
 		if len(store.winCalls) != 1 {
+			fmt.Printf("store win calls: %v", store.winCalls)
 			t.Errorf("got %d win calls, want %d", len(store.winCalls), 1)
 		}
 
