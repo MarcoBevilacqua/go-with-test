@@ -107,15 +107,7 @@ func TestStoreWins(t *testing.T) {
 		
 		server.ServeHTTP(response, request)
 		assertStatus(t, response.Code, http.StatusAccepted)
-
-		if len(store.winCalls) != 1 {
-			fmt.Printf("store win calls: %v", store.winCalls)
-			t.Errorf("got %d win calls, want %d", len(store.winCalls), 1)
-		}
-
-		if store.winCalls[0] != player {
-			t.Errorf("got %s, wanted %s", store.winCalls[0], player)
-		}
+		assertPlayerWin(t, store, player)		
 	})
 }
 
@@ -196,5 +188,18 @@ func assertContentType(t testing.TB, response *httptest.ResponseRecorder, want s
 	t.Helper()
 	if response.Result().Header.Get("content-type") != want {
 		t.Errorf("response did not have content-type of %s, got %v", want, response.Result().Header)
+	}
+}
+
+
+func assertPlayerWin(t testing.TB, store StubPlayerStore, winner string) {
+	t.Helper()
+
+	if len(store.winCalls) != 1 { 
+		t.Fatalf("got %d calls, to recordWin, want %d", len(store.winCalls), 1)
+	}
+
+	if store.winCalls[0] != winner { 
+		t.Errorf("got winner %s, wanted %s", store.winCalls[0], winner)
 	}
 }
