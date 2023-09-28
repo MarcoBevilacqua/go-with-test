@@ -10,24 +10,6 @@ import (
 	"testing"
 )
 
-type StubPlayerStore struct{
-	scores map[string]int
-	winCalls []string
-	league league
-}
-
-func (s *StubPlayerStore) GetPlayerScore(name string) int {
-	return s.scores[name]
-}
-
-func (s *StubPlayerStore) RecordWin(name string) {	
-	s.winCalls = append(s.winCalls, name)
-}
-
-func (s *StubPlayerStore) GetLeague() league {
-	return s.league
-}
-
 func TestGETPlayers(t *testing.T) {
 
 	store := StubPlayerStore{
@@ -94,12 +76,8 @@ func TestStoreWins(t *testing.T) {
 	})	
 
 	t.Run("it records Win when POST", func (t *testing.T) {
-		store := StubPlayerStore{
-			map[string]int{},
-			nil,
-			nil,
-		}
-		server := NewPlayerServer(&store)
+		store := &StubPlayerStore{}
+		server := NewPlayerServer(store)
 
 		player := "Pepper"
 		request := newPostWinRequest(player)
@@ -107,7 +85,7 @@ func TestStoreWins(t *testing.T) {
 		
 		server.ServeHTTP(response, request)
 		assertStatus(t, response.Code, http.StatusAccepted)
-		assertPlayerWin(t, store, player)		
+		AssertPlayerWin(t, store, player)		
 	})
 }
 
@@ -188,18 +166,5 @@ func assertContentType(t testing.TB, response *httptest.ResponseRecorder, want s
 	t.Helper()
 	if response.Result().Header.Get("content-type") != want {
 		t.Errorf("response did not have content-type of %s, got %v", want, response.Result().Header)
-	}
-}
-
-
-func assertPlayerWin(t testing.TB, store StubPlayerStore, winner string) {
-	t.Helper()
-
-	if len(store.winCalls) != 1 { 
-		t.Fatalf("got %d calls, to recordWin, want %d", len(store.winCalls), 1)
-	}
-
-	if store.winCalls[0] != winner { 
-		t.Errorf("got winner %s, wanted %s", store.winCalls[0], winner)
 	}
 }
